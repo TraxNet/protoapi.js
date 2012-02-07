@@ -243,7 +243,7 @@
 			/**
 			 * ProtoAPI REST frontend URI
 			 */
-			apiuri: 'http://localhost/api/1/objects/',
+			apiuri: 'http://ec2-46-137-23-68.eu-west-1.compute.amazonaws.com/api/1/objects/',
 
 			/**
 			 * Sets the max amount of objects to retrieve when a GET is issued
