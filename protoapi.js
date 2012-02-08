@@ -1,5 +1,5 @@
 /**
- * jQuery plugin for ProtoAPI
+ * ProtoAPI Official client for Javascript
  * 
  * Copyright 2012, Oscar Blasco Maestro
  *
@@ -18,10 +18,9 @@
  * Note: some helper functions and code has been used from other sources.
  *		  - Base64 encode/decode from webtoolkit.info
  *
- * jQuery is required, tested against jQuery v1.7.1.
  */
 
-(function($)
+(function()
 {
 	/*
 	 * Base64 encode / decode
@@ -94,6 +93,7 @@
 	    },
 	}
 
+	// TODO: This is intrusive. 
 	if (!Function.prototype.bind) { // check if native implementation available
 		Function.prototype.bind = function(){ 
 	    	var fn = this, args = Array.prototype.slice.call(arguments),
@@ -106,10 +106,9 @@
 	}
 
 	/*
-	 * RestClient is a thin warper around $.ajax to make things even easier.
+	 * RestClient is a thin warper XmlHttpRequest object to make things even easier.
 	 * This is in fact the object you will be dealing with when using this
-	 * library, the jquery interface is just a handy way to instantiate a
-	 * a RestClient object.
+	 * library.
 	 * 
 	 */
 	var RestClient = function( config ){
@@ -117,7 +116,7 @@
 	}
 	RestClient.prototype = {
 		/**
-		 * Warper around $.ajax for GET method
+		 * Warper around ajax call for GET method
 		 *
 		 * @param filter: A json object with the filter to apply to this search. 
 		 *				  Please refer to ProtoAPI's  documentation for more 
@@ -136,7 +135,7 @@
 		},
 
 		/**
-		 * Warper around $.ajax for POST method
+		 * Warper around ajax call for POST method
 		 *
 		 * @param data: object to post. The current classname is used, 
 		 * 				in case a '_cls' field is found, both must match.
@@ -150,7 +149,7 @@
 		},
 
 		/**
-		 * Warper around $.ajax for PUT method
+		 * Warper around ajax call for PUT method
 		 *
 		 */
 		put: function( data, callback ){
@@ -182,7 +181,7 @@
 						_data._id = response.data; 
 
 						// run the callback 
-						if( $.isFunction( _cbk ))
+						if( typeof _cbk === "function" )
 						{
 							_cbk( _data );
 						}
@@ -191,23 +190,6 @@
 			}
 		},
 
-		__ajax2: function( uri, data, method, callback ){
-			
-			$.ajax({
-			    type: method,
-			    url: uri,
-			    data: data,
-			    processData: false,
-				beforeSend: this.__serviceAJAX_beforeSend.bind(this),
-			    error: function( XMLHttpRequest, textStatus, errorThrown ) { 
-				    this.__log('ProtoAPI error: ' + errorThrown); 
-				},
-			    success: function( response ){
-					callback( response );
-				},
-				
-			});
-		},
 
 		__log: function( log_e ){
 			if( console && console.log )
@@ -226,7 +208,7 @@
 				    xmlHttp.send(data);
   				} catch (e){
 			    	if( this.config.error )
-			    		this.config.error( 400, e );
+			    		this.config.error( { code: 400, error: e.toString()} );
 			    }
   			}
 		},
@@ -243,7 +225,8 @@
 				  	}
 				} else{
 					if( this.config.error ){
-						this.config.error( xmlHttp.status );
+						var data = { code: xmlHttp.status, error: xmlHttp.statusText };
+						this.config.error( data );
 					}
 				}
 	  		}
@@ -307,15 +290,50 @@
 		},
 	}
 
+	/**
+	 * This object stores global configuration between calls.
+	 * For example, appid and appkey is stored here once set
+	 */
 	var globals = {}
 
-	$.fn.protoapi = function( config ){
+	/**
+	 * Very simple extend function. Enough for us.
+	 */
+	var extend = function(){
+		data = arguments[ 0 ] || {};
 
-		if( config ){
-			globals = $.extend(globals, config);
+		if( typeof data !== "object" ){
+			data = {};
 		}
 
-		var options = $.extend(
+		i = 1;
+
+		for( ; i < arguments.length; i++ ){
+			var type = typeof arguments[ i ];
+			if ( type === 'undefined' || type === 'null' )
+				continue;
+
+			var current = arguments[ i ];
+			for( value in current ){
+				var source = current[ value ];
+				if ( typeof value === 'undefined' || typeof value === 'null' )
+					continue;
+				
+				data[ value ] = current;
+				
+			}
+		}
+
+		return data;
+	}
+
+	protoapi = function( config ){
+		
+		if( typeof config === 'object' ){
+			globals = extend(globals, config);
+		}
+
+		var options = extend(
 		{
 			/**
 			 * A callback method to be called upon an error 
@@ -351,9 +369,13 @@
 
 		}, globals);
 
-		options.classname = this.selector;
-		return new RestClient( options );
+		// If it's an string is because caller is setting classname (collection) 
+		// he wants to access for this api call.
+		if( typeof config === 'string' ){
+			options.classname = config;
+		} // We can add a check here to be sure classname is set
 
+		return new RestClient( options );
 	}
 
-}(jQuery));
+}());
