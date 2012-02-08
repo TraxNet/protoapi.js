@@ -94,6 +94,17 @@
 	    },
 	}
 
+	if (!Function.prototype.bind) { // check if native implementation available
+		Function.prototype.bind = function(){ 
+	    	var fn = this, args = Array.prototype.slice.call(arguments),
+	        	object = args.shift(); 
+	    	return function(){ 
+	      		return fn.apply(object, 
+	        	args.concat(Array.prototype.slice.call(arguments))); 
+	    	}; 
+	  	};
+	}
+
 	/*
 	 * RestClient is a thin warper around $.ajax to make things even easier.
 	 * This is in fact the object you will be dealing with when using this
@@ -149,7 +160,7 @@
 			json_data = JSON.stringify( data );
 			var _id = data._id.toString();
 			var uri = this.config.apiuri + this.config.classname + '/' + _id, json_data;
-			this.__ajax( uri, 'PUT', callback );
+			this.__ajax( uri, json_data, 'PUT', callback );
 			return this;
 		},
 
@@ -161,12 +172,16 @@
 		 * @param callback: If present, it's called upon succesful save with the updated object
 		 */
 		save: function( data, callback ){
-			if( "_id" in data){ // Update
-				
+			if( '_id' in data ){ // Update
+				this.put( data, callback );
 			} else { // Create
 				this.post( data, function( _data, _cbk ){
+					// warp data and the callback into a closure
 					return function( response ){
-						_data._id = response.data; // store _id into object
+						// store returned _id into object
+						_data._id = response.data; 
+
+						// run the callback 
 						if( $.isFunction( _cbk ))
 						{
 							_cbk( _data );
@@ -176,7 +191,7 @@
 			}
 		},
 
-		__ajax: function( uri, data, method, callback ){
+		__ajax2: function( uri, data, method, callback ){
 			
 			$.ajax({
 			    type: method,
@@ -185,14 +200,93 @@
 			    processData: false,
 				beforeSend: this.__serviceAJAX_beforeSend.bind(this),
 			    error: function( XMLHttpRequest, textStatus, errorThrown ) { 
-				    if( console && console.log )
-				    	console.log('ProtoAPI error: ' + errorThrown); 
+				    this.__log('ProtoAPI error: ' + errorThrown); 
 				},
 			    success: function( response ){
 					callback( response );
 				},
 				
 			});
+		},
+
+		__log: function( log_e ){
+			if( console && console.log )
+				console.log(log_e);
+		},
+
+		__ajax: function( uri, data, method, callback ){
+			xmlHttp = this.__createRequestObject();
+
+			if (xmlHttp)
+  			{
+  				try {
+  					xmlHttp.open( method, uri, true );
+  					this.__addProtoAPICommonHeader( xmlHttp );
+				    xmlHttp.onreadystatechange = this.__onRequestStateChange.bind( this, xmlHttp, callback );
+				    xmlHttp.send(data);
+  				} catch (e){
+			    	if( this.config.error )
+			    		this.config.error( 400, e );
+			    }
+  			}
+		},
+
+		__onRequestStateChange: function( xmlHttp, callback ){
+			if (xmlHttp.readyState == 4){
+				if (xmlHttp.status >= 200 && xmlHttp.status < 300){
+					var response = xmlHttp.responseText;
+				  	if( response.length > 0 ){
+				  		var data = JSON.parse( response );
+				  		callback( data );
+				  	} else{
+				  		callback();
+				  	}
+				} else{
+					if( this.config.error ){
+						this.config.error( xmlHttp.status );
+					}
+				}
+	  		}
+		},
+
+		__addProtoAPICommonHeader: function( xmlHttp ){
+			xmlHttp.setRequestHeader('Authorization', 
+				this.__makeBasicAuth ( this.config.appid, this.config.appkey ));
+		},
+
+
+		__createRequestObject: function(){
+			var xmlhttp=false;
+			/*@cc_on @*/
+			/*@if (@_jscript_version >= 5)
+			// JScript gives us Conditional compilation, we can cope with old IE versions.
+			// and security blocked creation of the objects.
+			 try {
+			  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+			 } catch (e) {
+			  try {
+			   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+			  } catch (E) {
+			   xmlhttp = false;
+			  }
+			 }
+			@end @*/
+			if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+				try {
+					xmlhttp = new XMLHttpRequest();
+				} catch (e) {
+					xmlhttp=false;
+				}
+			}
+			if (!xmlhttp && window.createRequest) {
+				try {
+					xmlhttp = window.createRequest();
+				} catch (e) {
+					xmlhttp=false;
+				}
+			}
+
+			return xmlhttp;
 		},
 
 		/**
@@ -243,7 +337,7 @@
 			/**
 			 * ProtoAPI REST frontend URI
 			 */
-			apiuri: 'http://ec2-46-137-23-68.eu-west-1.compute.amazonaws.com/api/1/objects/',
+			apiuri: 'https://protoapi.com/api/1/objects/',
 
 			/**
 			 * Sets the max amount of objects to retrieve when a GET is issued
