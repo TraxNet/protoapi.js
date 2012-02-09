@@ -1,5 +1,5 @@
 /**
- * ProtoAPI Official client for Javascript
+ * Javascript Official Client for ProtoAPI backend
  * 
  * Copyright 2012, Oscar Blasco Maestro
  *
@@ -18,6 +18,10 @@
  * Note: some helper functions and code has been used from other sources.
  *		  - Base64 encode/decode from webtoolkit.info
  *
+ * Version History:
+ *		- 0.1 Initial version.
+ *
+ * Currently tested on: Chrome 16.0.912.77, Firefox 9.0.1
  */
 
 (function()
@@ -190,12 +194,17 @@
 			}
 		},
 
-
+		/** We cannot call console.log on IE */
 		__log: function( log_e ){
 			if( console && console.log )
 				console.log(log_e);
 		},
 
+		/** 
+		 * __ajax creates a XmlHttpRequest objects, sets all needed headers and fires
+		 * the request. It's the tipical parttern used when dealing with XmlHttpRequest.
+		 * See __onRequestStateChange to check on how data is handled once recived.
+		 */
 		__ajax: function( uri, data, method, callback ){
 			xmlHttp = this.__createRequestObject();
 
@@ -213,15 +222,25 @@
   			}
 		},
 
+		/** 
+		 * Once the request has ended (readyState == 4) we can handle its success or failure and
+		 * call the apropiate callback.
+		 */
 		__onRequestStateChange: function( xmlHttp, callback ){
-			if (xmlHttp.readyState == 4){
+			if (xmlHttp.readyState === 4){
 				if (xmlHttp.status >= 200 && xmlHttp.status < 300){
 					var response = xmlHttp.responseText;
+
 				  	if( response.length > 0 ){
 				  		var data = JSON.parse( response );
-				  		callback( data );
+
+				  		if( typeof callback === 'function'){
+				  			callback( data );
+				  		}
 				  	} else{
-				  		callback();
+				  		if( typeof callback === 'function'){
+				  			callback();
+				  		}
 				  	}
 				} else{
 					if( this.config.error ){
@@ -232,12 +251,13 @@
 	  		}
 		},
 
+		/** Add common required headers from ProtoAPI */
 		__addProtoAPICommonHeader: function( xmlHttp ){
 			xmlHttp.setRequestHeader('Authorization', 
 				this.__makeBasicAuth ( this.config.appid, this.config.appkey ));
 		},
 
-
+		/** Creates an XmlHttpRequest object on various browsers */
 		__createRequestObject: function(){
 			var xmlhttp=false;
 			/*@cc_on @*/
@@ -319,7 +339,7 @@
 				if ( typeof value === 'undefined' || typeof value === 'null' )
 					continue;
 				
-				data[ value ] = current;
+				data[ value ] = source;
 				
 			}
 		}

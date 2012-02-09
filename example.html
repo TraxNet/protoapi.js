@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta charset="utf-8">
 	
-	<title>jQuery plugin client for ProtoAPI</title>
+	<title>Javascript client for ProtoAPI</title>
 	<style type="text/css">
 	</style>
 </head>
@@ -14,17 +14,17 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="protoapi.js"></script>
 <script>
-	$("Posts").protoapi( { appid: "4f2b8c5d3dcd200e6900005e", appkey: "25b0aa7b3cde834b90ca30a15ed03b9c", classname: "Posts" } ).post({ name: "test2", user: "pepito" }, function( data ){ 
+	protoapi( { appid: "4f2b8c5d3dcd200e6900005e", appkey: "25b0aa7b3cde834b90ca30a15ed03b9c", classname: 'posts' } ).post({ name: "test2", user: "pepito" }, function( data ){ 
 			console.log( data );
 	});
-	$("Posts").protoapi().get({ name: "test2" }, function( data ){ console.log(data); });
-	$("Posts").protoapi().save({ name: "Oscar", user: "Meng" }, function( data ){ 
+	protoapi( 'posts' ).get( { name: "test2" }, function( data ){ console.log(data); } );
+	protoapi( 'posts' ).save( { name: "Oscar", user: "Meng" }, function( data ){ 
 		console.log(data); 
 		data.name = 'YuanYuan';
-		$('Posts').protoapi().save( data, function( _data ){
+		protoapi( 'posts' ).save( data, function( _data ){
 			console.log(_data);
 
-			$("Posts").protoapi().get({ _id: data._id }, function( data ){ console.log(data); });
+			protoapi( 'posts' ).get({ _id: data._id }, function( data ){ console.log(data); });
 		});
 	});
 
