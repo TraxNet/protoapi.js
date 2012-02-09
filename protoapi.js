@@ -194,6 +194,36 @@
 			}
 		},
 
+		/**
+		 * Deletes all objects matching given filter object in
+		 */
+		delete: function( filter, callbacj ){
+			var json_data = JSON.stringify( filter );
+			json_data = encodeURIComponent( json_data );
+			var query_str = '&filter=' + json_data;
+			var uri = this.config.apiuri + this.config.classname + query_str;
+			this.__ajax( uri, '', 'DELETE', callback );
+			return this;
+		}
+
+		/** 
+		 * Sets the starting position of returned data for GET calls
+		 * For example for a collection of 100 documents, setting pointer equal
+		 * to 95 will retrieve the last 5 documents from that collection
+		 */
+		pointer: function( number ){
+			if( typeof number === 'number' || typeof number === 'string' )
+				this.config.pointer = number;
+		},
+
+		/**
+		 * Limits the number of returned objects for GET calls
+		 */
+		limit: function( number ){
+			if( typeof number === 'number' || typeof number === 'string' )
+				this.config.limit = number;
+		}
+
 		/** We cannot call console.log on IE */
 		__log: function( log_e ){
 			if( console && console.log )
