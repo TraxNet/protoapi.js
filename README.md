@@ -13,11 +13,11 @@ Grab the lastest version of protoapi.js [here](https://github.com/TraxNet/protoa
 
 Adding protoapi.js is a matter of adding an script reference to protoapi.js file or protoapi.min.js to your application. For example using HTML markup:
 
-	<script src="" type="javascript"></script>
+	<script src="protoapi.js" type="javascript"></script>
 
 Before you can start working with ProtoAPI you need to set your appid and appkey for the App you want to use. You can review your App's information at ProtoAPI's Dev Center page here. 
 
-Protoapi's constructor take either a configuration object or an string. When a configuration object is passed, options will be read and set as globals for the subsequent calls to protoapi.js. If an string is passed, it will be used as the classname for the current api call. For example:
+Protoapi's constructor takse either a configuration object or an string. When a configuration object is passed, options will be read and set as globals for subsequent calls to protoapi.js. If an string is passed, it will be used as the classname for the current api call. For example:
 	
 	// Configure protoapi.js
 	// Next calls will be configured to perform call to this AppID
@@ -27,7 +27,7 @@ Protoapi's constructor take either a configuration object or an string. When a c
 	protoapi( 'posts' ).get({}, function( response ){ // your callback code goes here });
 
 	// Get objects matching 'ProtoAPI\'s backed' as their title and classname equal to 'posts'
-	protoapi( 'posts' ).get({ title: 'ProtoAPI\'s backend }, function( response ){ // your callback code goes here });
+	protoapi( 'posts' ).get({ title: 'ProtoAPI\'s backend' }, function( response ){ // your callback code goes here });
 
 
 ## Adding objects
@@ -46,7 +46,7 @@ Using 'save' flavour will handle creation (POST) and updates (PUT) depending if 
 
 ## Getting objects
 
-Searching for objects is accomplished using protoapi.get fir a filter object as first argument. A wide range of query operands are supported, please check [ProtoAPI's documentation](http://protoapi.com/docs/queries) on how to perform complex queries using filter objects here.
+Searching for objects is accomplished using protoapi.get with a filter object as first argument. A wide range of query operands are supported, please check [ProtoAPI's documentation](http://protoapi.com/docs/queries) on how to perform complex queries using filter objects [here](http://localhost/docs/queries).
 
 	// Get all summatory operations stored at ProtoAPI
 	protoapi( 'operations' ).get( {type: '+' }, function( response ){ // do something with your data });
@@ -62,10 +62,9 @@ Call protoapi.delete with a filter query to perform a delete operation on all ob
 
 ## Next steps 
 
-Read all tests in tests.js and review ProtoDO example. ProtoDO is an small 'todo' manager application which uses ProtoAPI to store
-all TODOS in the cloud so that you cannot say you forgot your grocery list at home!
+Read all tests in tests.js and review [ProtoDo example](https://github.com/TraxNet/ProtoDo). ProtoDo is an small tasks manager application which uses ProtoAPI to store all TODOS in the cloud so that you cannot say you forgot your grocery list at home!
 
-Please use github issue page to point to any bug found in the platform or protoapi.js
+Please use github issue page to let us know of any bug, issue or idea found in the platform or protoapi.js
 
 Also don't forget to take a look to ProtoAPI's documentation and have fun storing data in the cloud without worries on scaling and server management. Send your ideas, comments, worries or tips to feedback@protoapi.com. 
 
