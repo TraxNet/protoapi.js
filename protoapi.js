@@ -19,9 +19,9 @@
  *		  - Base64 encode/decode from webtoolkit.info
  *
  * Version History:
- *		- 0.1 Initial version.
+ *		- 1.0.0 Initial version.
  *
- * Currently tested on: Chrome 16.0.912.77, Firefox 9.0.1
+ * Currently tested on: Chrome 16.0.912.77, Firefox 9.0.1, Safari 5.1.2
  */
 
 (function()
@@ -200,7 +200,7 @@
 		delete: function( filter, callback ){
 			var json_data = JSON.stringify( filter );
 			json_data = encodeURIComponent( json_data );
-			var query_str = '&filter=' + json_data;
+			var query_str = '?filter=' + json_data;
 			var uri = this.config.apiuri + this.config.classname + query_str;
 			this.__ajax( uri, '', 'DELETE', callback );
 			return this;
