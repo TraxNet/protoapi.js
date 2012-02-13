@@ -1,5 +1,8 @@
 /**
  * Javascript Official Client for ProtoAPI backend
+ *
+ * ProtoAPI is a cloud-based object store that can simplify your 
+ * backend development from days to minutes. 
  * 
  * Copyright 2012, Oscar Blasco Maestro
  *
